@@ -11,6 +11,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 def scrape_all():
     # Initiate headless driver for deployment
+    
     executable_path = {'executable_path': ChromeDriverManager().install()}
     browser = Browser('chrome', **executable_path, headless=True)
 
@@ -21,13 +22,68 @@ def scrape_all():
         "news_title": news_title,
         "news_paragraph": news_paragraph,
         "featured_image": featured_image(browser),
+        "last_modified": dt.datetime.now(),
         "facts": mars_facts(),
-        "last_modified": dt.datetime.now()
+        "hemispheres": scrape_mars_hemispheres()
     }
 
     # Stop webdriver and return data
     browser.quit()
     return data
+
+def scrape_mars_hemispheres():
+    # Initiate headless driver for deployment
+    executable_path = {'executable_path': ChromeDriverManager().install()}
+    browser = Browser('chrome', **executable_path, headless=True)    
+
+    # 1. Use browser to visit the URL 
+    url = 'https://marshemispheres.com/'
+    html = browser.html
+
+    browser.visit(url)
+    html_soup = soup(html, 'html.parser')
+
+    # 2. Create a list to hold the images and titles.
+    hemisphere_image_titles = []
+    hemisphere_image_urls = []
+
+
+    # 3. Write code to retrieve the image urls and titles for each hemisphere.
+    mars_hemisphere_html = browser.html
+    mars_hemisphere_soup = soup(mars_hemisphere_html,"html.parser")
+    mars_hemispheres =  mars_hemisphere_soup.find_all("div", class_ = "item")
+
+    # Loop through the full-resolution image URL
+    for item in mars_hemispheres:
+        
+        # Create an empty dictionary
+        hemispheres = {}
+        
+        link = item.find("a",class_="itemLink product-item").get("href")
+        hemisphere_url = url + link
+        print(hemisphere_url)
+        
+        browser.visit(hemisphere_url)
+        hemisphere_html = browser.html
+        hemisphere_soup = soup(hemisphere_html,"html.parser")
+        
+        # Image 
+        image = hemisphere_soup.find("img",class_ = "wide-image").get("src")
+        
+        # Title
+        title = hemisphere_soup.find("h2",class_ = "title").text
+        
+        # Add image urls to hemispheres dictionary
+        hemispheres["title"] = title
+        hemispheres["img_url"] = f'{url}{image}'
+        hemisphere_image_urls.append(hemispheres)
+        
+    # 5. Quit the browser
+    browser.quit()
+        
+    # 4. Print the list that holds the dictionary of each image url and title.
+    return hemisphere_image_urls
+
 
 
 def mars_news(browser):
