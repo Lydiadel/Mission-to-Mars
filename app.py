@@ -15,9 +15,10 @@ mongo = PyMongo(app)
 
 def index():
     # find the "mars" collection in our database
-    mars = mongo.db.mars.find_one()
+   mars = mongo.db.mars.find_one()
     # return html template and use mars collection in MongoDB
-    return render_template("index.html", mars=mars)
+   return render_template("index.html", mars=mars)
+
 
 # Define scrape route
 @app.route("/scrape")
